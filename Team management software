@@ -1,0 +1,158 @@
+import mysql.connector
+con=mysql.connector.connect(host='localhost', user='root', password='abcd')
+cur=con.cursor()
+if con.is_connected():
+    print('connected')
+else:
+    print('error')
+cur.execute('create database if not exists IPL')
+def init():
+    cur.execute('use IPL')
+    cur.execute('create table if not exists Player(Pid int primary key,Name char(20) not null,Country char(20),TeamID int unique,TotalRuns int, TotalWi int)')
+    cur.execute('create table if not exists Team(TeamId int Primary key, Name char(20) not null, WINYEAR int, State char(20))')
+#adding new records in both tables
+def addP():
+    cur.execute('use IPL')
+    n=int(input('Enter the no of entries: '))
+    for i in range(0,n):
+        print('Now enter details for player ',i+1)
+        Pid=int(input('Enter the Player ID: '))
+        nm=input('Enter player name: ')
+        cou=input('Enter country name: ')
+        Tid=int(input('Enter team id: '))
+        TR=int(input('Enter total runs scored by player: '))
+        TW=int(input('Enter total wickets taken: '))
+        s='insert into Player values(%s,%s,%s,%s,%s,%s)'
+        val=(Pid,nm,cou,Tid,TR,TW)
+        cur.execute(s,val)
+        con.commit()
+def addT():
+    cur.execute('use IPL')
+    n=int(input('Enter the no of entries: '))
+    for i in range(0,n):
+        Tid=int(input('Enter Team ID: '))
+        nm=input('enter team name')
+        wn=int(input('Enter no of years the team has the trophy: '))
+        st=input('enter the state that the team belongs to: ')
+        s='insert into Team values(%s,%s,%s,%s)'
+        val=(Tid,nm,wn,st)
+        cur.execute(s,val)
+        con.commit()
+#removing records from the tables
+def removerecP():
+    cur.execute('use IPL')
+    pid=int(input("Enter player id to remove: "))
+    s="delete from player where Pid=%s"
+    val=(pid,)
+    cur.execute(s,val)
+    con.commit()
+def removerecT():
+    cur.execute('use IPL')
+    tid=int(input("Enter team id to remove: "))
+    s="delete from team where Tid=%s"
+    val=(tid,)
+    cur.execute(s,val)
+    con.commit()
+#To change the no of wickets taken or runs scored by a player
+def modifyrecP():
+    cur.execute('use IPL')
+    pid=int(input("Enter player id to be edited: "))
+    n=int(input('To change no of runs-1, to change no of wickets taken-2'))
+    if n==1:
+        new=int(input("Enter the new number of runs: "))
+        s='update player set TotalRuns=%s where Pid=%s'
+    else:
+        new=int(input("Enter the new number of wickets: "))
+        s='update player set TotalWi=%s where Pid=%s'    
+    val=(new,pid)
+    cur.execute(s,val)
+    con.commit()
+#To change the no of times the team has won
+def modifyrecT():
+    cur.execute('use IPL')
+    tid=int(input("Enter team id to be edited: "))
+    new=int(input("Enter the new number of wins: "))
+    s='update player set WINYEAR=%s where tid=%s'   
+    val=(new,tid)
+    cur.execute(s,val)
+    con.commit()
+#Displaying contents of both the tables
+def displayP():
+    cur.execute('use IPL')
+    s='select * from player'
+    cur.execute(s)
+    x=cur.fetchall()
+    for i in x:
+        print(i)
+def displayT():
+    cur.execute('use IPL')
+    s='select * from team'
+    cur.execute(s)
+    x=cur.fetchall()
+    for i in x:
+        print(i)
+#To search players based on country
+def sear():
+    cur.execute('use IPL')
+    c=input('Enter country name to search for players: ')
+    s='select * from player where country=%s'
+    val=(c,)
+    cur.execute(s,val)
+    con.commit()
+#Maximum runs and wickets by each team
+def maxW():
+    cur.execute('use IPL')
+    cur.execute('select team.name, player.name, max(TotalWi) from team, player where(player.teamid=team.teamid) group by player.teamid')
+    x=cur.fetchall()
+    for i in x:
+        print(i)
+def maxR():
+    cur.execute('use IPL')
+    cur.execute('select team.name, player.name, max(TotalRuns) from team, player where(player.teamid=team.teamid) group by player.teamid')
+    x=cur.fetchall()
+    for i in x:
+        print(i)
+#Reporting all the players and teams they belong to
+def repT():
+    cur.execute('use IPL')
+    s='select player.name, team.name from player,team where(player.teamid=team.teamid)'
+    cur.execute(s)
+    x=cur.fetchall()
+    for i in x:
+        print(i)
+
+#Creating the menu and initiating the program
+init()
+while True:
+    print('1-Add records in PLAYER\n2-Add records in TEAM\n3-Remove record from PLAYER\n4-Remove record from TEAM\n5-Modify total runs or wickets for a player')
+    print('6-To change the no of wins by a team\n7-Display table PLAYER\n8-Display table TEAM\n9-Search All the players of a particular country')
+    print('10-Max wickets taken in each team\n11-Max runs scored in each team\n12-Display all players with team name')
+    n=int(input('Enter choice: '))
+    if n==1:
+        addP()
+    elif n==2:
+        addT()
+    elif n==3:
+        removerecP()
+    elif n==4:
+        removerecT()
+    elif n==5:
+        modifyrecP()
+    elif n==6:
+        modifyrecT()
+    elif n==7:
+        displayP()
+    elif n==8:
+        displayT()
+    elif n==9:
+        sear()
+    elif n==10:
+        maxW()
+    elif n==11:
+        maxR()
+    elif n==12:
+        repT()
+    else:
+        print('Your choice does not correspond to a function')
+    print('....\n')
+        
